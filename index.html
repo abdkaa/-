@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لغز الأرقام</title>
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      font-family: Tahoma, Arial, sans-serif;
+      background: linear-gradient(135deg, #dfe9ff, #f7e8ff);
+    }
+
+    .game {
+      width: min(420px, calc(100% - 40px));
+      padding: 28px;
+      text-align: center;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(60, 50, 120, 0.15);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #4c3fc4;
+    }
+
+    input {
+      width: 120px;
+      padding: 12px;
+      text-align: center;
+      font-size: 22px;
+      border: 2px solid #cfd4ff;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #6c63d8;
+    }
+
+    button {
+      padding: 12px 18px;
+      margin: 8px 4px 0;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      background: #6c63d8;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #554cc1;
+    }
+
+    #message {
+      min-height: 30px;
+      margin: 18px 0 5px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #attempts {
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <h1>🎯 لعبة التخمين</h1>
+    <p>أنا فكر برقم من <strong>1 إلى 100</strong>.<br>هل تستطيع اكتشافه؟</p>
+
+    <input id="guess" type="number" min="1" max="100" placeholder="اكتب الرقم">
+    <br>
+    <button onclick="checkGuess()">خمن</button>
+    <button onclick="newGame()">لعبة جديدة</button>
+
+    <div id="message"></div>
+    <div id="attempts">محاولاتك: 0</div>
+  </div>
+
+  <script>
+    let secretNumber;
+    let attempts;
+
+    function newGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      document.getElementById("message").textContent = "";
+      document.getElementById("attempts").textContent = "محاولاتك: 0";
+      document.getElementById("guess").value = "";
+      document.getElementById("guess").focus();
+    }
+
+    function checkGuess() {
+      const guessInput = document.getElementBy("guess");
+
+      if (guessInput.value === "") {
+        document.getElementById("message").textContent = "اكتب رقمًا أولاً!";
+        return;
+      }
+
+      const guess = Number(guessInput.value);
+
+      if (guess < 1 || guess > 100) {
+        document.getElementById("message").textContent = "الرقم يجب أن يكون من 1 إلى 100";
+        return;
+      }
+
+      attempts++;
+      document.getElementById("attempts").textContent = `محاولاتك: ${attempts}`;
+
+      if (guess === secretNumber) {
+        document.getElementById("message").textContent =
+          `🎉 أحسنت! الرقم هو ${secretNumber}`;
+      } else if (guess < secretNumber) {
+        document.getElementById("message").textContent =
+          "🔼 رقمك صغير، جرّب رقمًا أكبر";
+      } else {
+        document.getElementById("message").textContent =
+          "🔽 رقمك كبير، جرّب رقمًا أصغر";
+      }
+    }
+
+    document.getElementById("guess").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") checkGuess();
+    });
+
+    newGame();
+  </script>
+</body>
+</html>
