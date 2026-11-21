@@ -1,136 +1,301 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لغز الأرقام</title>
-  <style>
-    body {
-      min-height: 100vh;
-      margin: 0;
-      display: grid;
-      place-items: center;
-      font-family: Tahoma, Arial, sans-serif;
-      background: linear-gradient(135deg, #dfe9ff, #f7e8ff);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة التخمين</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
 
-    .game {
-      width: min(420px, calc(100% - 40px));
-      padding: 28px;
-      text-align: center;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 12px 35px rgba(60, 50, 120, 0.15);
-    }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
+            padding: 20px;
+        }
 
-    h1 {
-      margin-top: 0;
-      color: #4c3fc4;
-    }
+        .game-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 24px;
+            padding: 35px 25px;
+            box-shadow: 0 15px 35px rgba(92, 84, 164, 0.12);
+            text-align: center;
+        }
 
-    input {
-      width: 120px;
-      padding: 12px;
-      text-align: center;
-      font-size: 22px;
-      border: 2px solid #cfd4ff;
-      border-radius: 10px;
-      outline: none;
-    }
+        /* شريط النقاط العلوي */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f7ff;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border: 1px solid #ece9ff;
+            font-size: 14px;
+        }
 
-    input:focus {
-      border-color: #6c63d8;
-    }
+        .score-right {
+            color: #4a3f9f;
+            font-weight: 700;
+        }
 
-    button {
-      padding: 12px 18px;
-      margin: 8px 4px 0;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      background: #6c63d8;
-      font-size: 16px;
-      cursor: pointer;
-    }
+        .score-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+            font-weight: 700;
+        }
 
-    button:hover {
-      background: #554cc1;
-    }
+        .reset-session-btn {
+            background: #ff5252;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-    #message {
-      min-height: 30px;
-      margin: 18px 0 5px;
-      font-size: 18px;
-      font-weight: bold;
-    }
+        .reset-session-btn:hover {
+            background: #e04040;
+        }
 
-    #attempts {
-      color: #777;
-    }
-  </style>
+        /* العنوان والنص */
+        h1 {
+            color: #4e44a6;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .subtitle span {
+            font-weight: 800;
+            color: #000;
+        }
+
+        /* حقل الإدخال */
+        input[type="number"] {
+            width: 80%;
+            padding: 14px;
+            font-size: 18px;
+            text-align: center;
+            border: 2px solid #6c63c9;
+            border-radius: 14px;
+            outline: none;
+            color: #333;
+            margin-bottom: 20px;
+            transition: box-shadow 0.2s;
+        }
+
+        input[type="number"]:focus {
+            box-shadow: 0 0 0 4px rgba(108, 99, 201, 0.15);
+        }
+
+        /* إزالة أسهم الرقم الافتراضية */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* الأزرار */
+        .buttons-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        button.action-btn {
+            background: #6a62c9;
+            color: #fff;
+            border: none;
+            padding: 12px 26px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        button.action-btn:hover {
+            background: #574fb8;
+        }
+
+        button.action-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* رسالة التوجيه (أعلى / أقل / صحيح) */
+        .feedback {
+            min-height: 28px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .attempts {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
-  <div class="game">
+
+<div class="game-card">
+    <!-- شريط النقاط -->
+    <div class="scoreboard">
+        <!-- اليمين: النقاط الدائمة -->
+        <div class="score-right">
+            🏆 نقاطك الكلية: <span id="totalScore">0</span>
+        </div>
+
+        <!-- اليسار: نقاط الجولة + زر إعادة بدء -->
+        <div class="score-left">
+            <span>النقاط: <span id="sessionScore">0</span></span>
+            <button class="reset-session-btn" onclick="resetSessionScore()">إعادة بدء</button>
+        </div>
+    </div>
+
+    <!-- عنوان اللعبة -->
     <h1>🎯 لعبة التخمين</h1>
-    <p>أنا فكر برقم من <strong>1 إلى 100</strong>.<br>هل تستطيع اكتشافه؟</p>
 
-    <input id="guess" type="number" min="1" max="100" placeholder="اكتب الرقم">
-    <br>
-    <button onclick="checkGuess()">خمن</button>
-    <button onclick="newGame()">لعبة جديدة</button>
+    <p class="subtitle">
+        أنا أفكر برقم من <span>1 إلى 100</span>.<br>
+        هل تستطيع اكتشافه؟
+    </p>
 
-    <div id="message"></div>
-    <div id="attempts">محاولاتك: 0</div>
-  </div>
+    <!-- إدخال الرقم -->
+    <input type="number" id="guessInput" placeholder="اكتب الرقم" min="1" max="100">
 
-  <script>
+    <!-- أزرار التحكم -->
+    <div class="buttons-row">
+        <button class="action-btn" id="guessBtn" onclick="checkGuess()">خمن</button>
+        <button class="action-btn" onclick="newGame()">إعادة اللعبة</button>
+    </div>
+
+    <!-- نتيجة التخمين -->
+    <div class="feedback" id="feedback"></div>
+
+    <!-- عداد المحاولات -->
+    <div class="attempts">محاولاتك: <span id="attemptsCount">0</span></div>
+</div>
+
+<script>
     let secretNumber;
-    let attempts;
+    let attempts = 0;
+    let gameWon = false;
 
+    // جلب النقاط المحفوظة من المتصفح (لا تُحذف أبداً)
+    let totalScore = parseInt(localStorage.getItem('guessing_total_score')) || 0;
+    // نقاط الجلسة الحالية (تتصفّر عند الضغط على إعادة بدء)
+    let sessionScore = 0;
+
+    const totalScoreEl = document.getElementById('totalScore');
+    const sessionScoreEl = document.getElementById('sessionScore');
+    const guessInput = document.getElementById('guessInput');
+    const feedbackEl = document.getElementById('feedback');
+    const attemptsEl = document.getElementById('attemptsCount');
+
+    // تحديث عرض النقاط عند فتح الصفحة
+    totalScoreEl.textContent = totalScore;
+
+    // بدء لعبة جديدة
     function newGame() {
-      secretNumber = Math.floor(Math.random() * 100) + 1;
-      attempts = 0;
-      document.getElementById("message").textContent = "";
-      document.getElementById("attempts").textContent = "محاولاتك: 0";
-      document.getElementById("guess").value = "";
-      document.getElementById("guess").focus();
+        secretNumber = Math.floor(Math.random() * 100) + 1;
+        attempts = 0;
+        gameWon = false;
+        attemptsEl.textContent = attempts;
+        feedbackEl.textContent = '';
+        guessInput.value = '';
+        guessInput.disabled = false;
+        guessInput.focus();
     }
 
+    // التحقق من الرقم المدخل
     function checkGuess() {
-      const guessInput = document.getElementBy("guess");
+        if (gameWon) return;
 
-      if (guessInput.value === "") {
-        document.getElementById("message").textContent = "اكتب رقمًا أولاً!";
-        return;
-      }
+        const userGuess = parseInt(guessInput.value);
 
-      const guess = Number(guessInput.value);
+        if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+            feedbackEl.style.color = '#e53935';
+            feedbackEl.textContent = '⚠️ الرجاء إدخال رقم صحيح بين 1 و 100';
+            return;
+        }
 
-      if (guess < 1 || guess > 100) {
-        document.getElementById("message").textContent = "الرقم يجب أن يكون من 1 إلى 100";
-        return;
-      }
+        attempts++;
+        attemptsEl.textContent = attempts;
 
-      attempts++;
-      document.getElementById("attempts").textContent = `محاولاتك: ${attempts}`;
+        if (userGuess === secretNumber) {
+            gameWon = true;
+            guessInput.disabled = true;
+            feedbackEl.style.color = '#2e7d32';
+            feedbackEl.textContent = `🎉 أحسنت! الجواب الصحيح هو ${secretNumber}`;
 
-      if (guess === secretNumber) {
-        document.getElementById("message").textContent =
-          `🎉 أحسنت! الرقم هو ${secretNumber}`;
-      } else if (guess < secretNumber) {
-        document.getElementById("message").textContent =
-          "🔼 رقمك صغير، جرّب رقمًا أكبر";
-      } else {
-        document.getElementById("message").textContent =
-          "🔽 رقمك كبير، جرّب رقمًا أصغر";
-      }
+            // إضافة نقطة للرصيد الدائم وللجلسة الحالية
+            totalScore++;
+            sessionScore++;
+            totalScoreEl.textContent = totalScore;
+            sessionScoreEl.textContent = sessionScore;
+            localStorage.setItem('guessing_total_score', totalScore);
+
+        } else if (userGuess < secretNumber) {
+            feedbackEl.style.color = '#ef6c00';
+            feedbackEl.textContent = '⬆️ الرقم الصحيح أعلى من تخمينك!';
+        } else {
+            feedbackEl.style.color = '#1e88e5';
+            feedbackEl.textContent = '⬇️ الرقم الصحيح أقل من تخمينك!';
+        }
+
+        guessInput.value = '';
+        guessInput.focus();
     }
 
-    document.getElementById("guess").addEventListener("keydown", function(event) {
-      if (event.key === "Enter") checkGuess();
+    // تصفير نقاط اليسار فقط (إعادة بدء)
+    function resetSessionScore() {
+        sessionScore = 0;
+        sessionScoreEl.textContent = sessionScore;
+        newGame();
+    }
+
+    // السماح بالضغط على زر Enter للتخمين
+    guessInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkGuess();
+        }
     });
 
+    // تشغيل اللعبة تلقائياً عند التحميل
     newGame();
-  </script>
+</script>
+
 </body>
 </html>
+
